@@ -2,21 +2,23 @@ const { MongoClient } = require('mongodb');
 const { config } = require('../middleware/config');
 const logger = require('../middleware/log');
 
-const authMechanism = config.DBPrefix +  'CFG?authMechanism=DEFAULT'
+const DBUrl = config.DBUrl + config.DBPrefix;
 
-const dbUrl =  "mongodb://dbadmin:password@localhost:27017/" + authMechanism;
+const authMechanism = '?authMechanism=DEFAULT'
+
+const dbCUrl =  DBUrl + 'CFG' + authMechanism;
 
 let dbCfgCon
 
 module.exports = {
     connectCfgDB: (cb) => {
-        MongoClient.connect(dbUrl)
+        MongoClient.connect(dbCUrl)
         .then((client) => {
             dbCfgCon = client.db()
             return cb()
         })
         .catch(err =>{
-            logger.loginfo(err);
+            logger.loginfo('con to cfg ' + err);
             return cb(err)
         })
     },
