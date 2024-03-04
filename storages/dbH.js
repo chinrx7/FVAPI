@@ -8,8 +8,6 @@ const authMechanism = '?authMechanism=DEFAULT'
 
 const dbHUrl =  DBUrl + 'HIS' + authMechanism;
 
-console.log(dbHUrl)
-
 let dbH;
 
 module.exports = {

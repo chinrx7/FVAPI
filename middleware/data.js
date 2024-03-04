@@ -14,6 +14,8 @@ module.exports.saveHisData = async (datas) => {
         const jStr = JSON.stringify(datas);
         const jData = JSON.parse(jStr);
 
+        //console.log(jData)
+
         const docs = [];
         const cols = [];
 
@@ -30,16 +32,23 @@ module.exports.saveHisData = async (datas) => {
             })
         });
 
+        //console.log(cols)
+        // console.log(docs)
+
         const insertDocs = [];
         cols.forEach(col => {
-            const fillData = docs.fill(function (docs) {
-                return docs.Colname.toString().includes(col);
+            //console.log(docs.TimeStamp.toString().includes(col))
+            const fillData = docs.filter(function (docs) {
+                return docs.TimeStamp.toString().includes(col);
             });
+            //console.log(fillData)
             insertDocs.push({ colName: col, rec: fillData })
-        })
+        });
+
+        //console.log(insertDocs)
 
         if(insertDocs){
-            this.saveHisData(insertDocs);
+            saveHisToDB(insertDocs);
         }
     }
     catch (err) {
@@ -48,7 +57,10 @@ module.exports.saveHisData = async (datas) => {
 }
 
 saveHisToDB = async (docs) => {
+
+
     chkCol = async (colname) => {
+        console.log(colname)
         let res = false;
         const cList = await dbH.listCollections().toArray();
         cList.forEach(c => {
@@ -61,12 +73,13 @@ saveHisToDB = async (docs) => {
 
     try{
         docs.forEach(async d => {
-            const chk = await chkCol(d.Colname);
-            if(!res){
-                await createTimeCols(d.Colname);
+            console.log(d)
+            const chk = await chkCol(d.colName);
+            if(!chk){
+                await createTimeCols(d.colName);
             }
 
-            const cols  = dbh.collection(d.Colname);
+            const cols  = dbH.collection(d.colName);
             let record = [];
             d.rec.forEach(r => {
                 record.push({ Name: r.Name, Value: r.Value, TimeStamp: new Date(r.TimeStamp)})
