@@ -22,13 +22,21 @@ module.exports.saveHisData = async (datas) => {
         jData.forEach(j => {
             j.Records.forEach(r => {
                 const docDate = new Date(r.TimeStamp);
-                const colname = docDate.getFullYear() + '-' + padMon((docDate.getMonth() + 1));
+
+                let spt = j.Name.split('-');
+                const colname = spt[0] + "_" + docDate.getFullYear() + '-' + padMon((docDate.getMonth() + 1));
+
+                //console.log(colname)
 
                 if (!cols.includes(colname)) {
                     cols.push(colname);
                 }
 
-                docs.push({ Name: j.Name, Value: r.Value, TimeStamp: r.TimeStamp, Colname: colname });
+                const rec = { Name: j.Name, Value: r.Value, TimeStamp: r.TimeStamp, Colname: colname };
+
+                //console.log(rec)
+                
+                docs.push(rec);
             })
         });
 
@@ -38,8 +46,9 @@ module.exports.saveHisData = async (datas) => {
         const insertDocs = [];
         cols.forEach(col => {
             //console.log(docs.TimeStamp.toString().includes(col))
+
             const fillData = docs.filter(function (docs) {
-                return docs.TimeStamp.toString().includes(col);
+                return docs.Colname.toString().includes(col);
             });
             //console.log(fillData)
             insertDocs.push({ colName: col, rec: fillData })
@@ -50,9 +59,12 @@ module.exports.saveHisData = async (datas) => {
         if (insertDocs) {
             saveHisToDB(insertDocs);
         }
+
+        return true;
     }
     catch (err) {
         logger.loginfo('save his data ' + err);
+        return false;
     }
 }
 

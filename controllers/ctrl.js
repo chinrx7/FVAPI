@@ -15,7 +15,7 @@ module.exports.insertData = async (req, res) => {
         if (auth.ValidateToken(token)) {
             const data = req.body;
             if (data) {
-                if (dataServices.saveHisData(data) === true) {
+                if (await dataServices.saveHisData(data) === true) {
                     res.status(200).json('Insert operation success!!!')
                 }
             }
