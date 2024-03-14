@@ -47,7 +47,7 @@ module.exports.saveHisData = async (datas) => {
 
         //console.log(insertDocs)
 
-        if(insertDocs){
+        if (insertDocs) {
             saveHisToDB(insertDocs);
         }
     }
@@ -60,7 +60,6 @@ saveHisToDB = async (docs) => {
 
 
     chkCol = async (colname) => {
-        console.log(colname)
         let res = false;
         const cList = await dbH.listCollections().toArray();
         cList.forEach(c => {
@@ -71,25 +70,24 @@ saveHisToDB = async (docs) => {
         return res;
     }
 
-    try{
+    try {
         docs.forEach(async d => {
-            console.log(d)
             const chk = await chkCol(d.colName);
-            if(!chk){
+            if (!chk) {
                 await createTimeCols(d.colName);
             }
 
-            const cols  = dbH.collection(d.colName);
+            const cols = dbH.collection(d.colName);
             let record = [];
             d.rec.forEach(r => {
-                record.push({ Name: r.Name, Value: r.Value, TimeStamp: new Date(r.TimeStamp)})
+                record.push({ Name: r.Name, Value: r.Value, TimeStamp: new Date(r.TimeStamp) })
             });
 
             cols.insertMany(record);
             return true;
         });
     }
-    catch(err){
+    catch (err) {
         logger.loginfo('Save His to DB ' + err);
         return false;
     }
