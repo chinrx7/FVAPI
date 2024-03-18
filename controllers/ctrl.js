@@ -58,8 +58,29 @@ module.exports.getcurrentvalues = async (req, res) => {
                     res.status(200).json(realtime);
                 }
                 else{
-                    res.status(200).json("No tag that specified found!!!!")
+                    res.status(200).json("No tag that specified found!!!!");
                 }
+            }
+            else{
+                res.status(200).json("Invalid request!!!");
+            }
+        }
+    }
+}
+
+module.exports.getHisvalues = async (req, res) => {
+    if(config.Debug === 'true'){
+        logger.loginfo("get Historian value")
+    }
+    const token = req.headers["authorization"];
+    if(token){
+        if(auth.ValidateToken(token)){
+            if(req.body){
+                const tagReqest = JSON.parse(JSON.stringify(req.body));
+
+            }
+            else{
+                res.status(200).json("Invalid request!!!");
             }
         }
     }
