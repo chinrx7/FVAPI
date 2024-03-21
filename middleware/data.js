@@ -9,6 +9,88 @@ connectHDB((err) => {
     }
 });
 
+module.exports.UpdateRealTime = async (realtime) => {
+    let insData = [];
+    let upData = [];
+
+    let res = false;
+
+    try {
+        realtime.forEach(async r => {
+            const exist = await CheckRealtimeExist(r.Name);
+            if (exist) {
+                upData.push(tranFromData(r));
+            }
+            else {
+                insData.push(tranFromData(r));
+            }
+
+            if (realtime.length === (insData.length + upData.length)) {
+                await UpdateRealtimeData(insData, upData);
+            }
+        });
+        res = true;
+    }
+    catch (err) {
+        logger.loginfo("Update realtime : " + err);
+    }
+
+    return res;
+}
+
+tranFromData = (rec) => {
+    let res;
+    res = { Name: rec.Name, Value: rec.Value, Unit: rec.Unit, TimeStamp: new Date(rec.TimeStamp) }
+    return res;
+}
+
+CheckRealtimeExist = async (Name) => {
+    let res = false;
+
+    const cols = dbH.collection("Realtime");
+
+    const doc = await cols.findOne({ Name: Name });
+
+    if (doc != null) {
+        res = true;
+    }
+
+    return res;
+
+}
+
+UpdateRealtimeData = async (insertdata, updatedata) => {
+    let res = false;
+    try {
+        const cols = dbH.collection("Realtime");
+
+        if (insertdata.length > 0) {
+            cols.insertMany(insertdata);
+        }
+
+        if (updatedata.length > 0) {
+            updatedata.forEach(u => {
+                cols.updateOne(
+                    { Name: u.Name },
+                    {
+                        $set: {
+                            Value: u.Value,
+                            TimeStamp: u.TimeStamp
+                        }
+                    }
+                )
+            });
+        }
+
+        res = true;
+
+        return res;
+    }
+    catch (err) {
+        logger.loginfo("Update realtime data : " + err);
+    }
+}
+
 module.exports.saveHisData = async (datas) => {
     try {
         const jStr = JSON.stringify(datas);
@@ -35,7 +117,7 @@ module.exports.saveHisData = async (datas) => {
                 const rec = { Name: j.Name, Value: r.Value, TimeStamp: r.TimeStamp, Colname: colname };
 
                 //console.log(rec)
-                
+
                 docs.push(rec);
             })
         });

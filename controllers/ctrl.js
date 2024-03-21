@@ -10,6 +10,9 @@ module.exports.test = async (req, res) => {
 }
 
 module.exports.insertData = async (req, res) => {
+    if(config.Debug === "true"){
+        logger.loginfo("insert historian data");
+    }
     const token = req.headers["authorization"];
     if (token) {
         if (auth.ValidateToken(token)) {
@@ -22,6 +25,27 @@ module.exports.insertData = async (req, res) => {
             else {
                 res.status(400).json('Bad request!!!');
             }
+        }
+    }
+}
+
+module.exports.updateRealtime = async (req,res) => {
+    if(config.Debug === "true"){
+        logger.loginfo("update Realtime");
+    }
+    const token = req.headers["authorization"];
+    if(token){
+        if(auth.ValidateToken(token)){
+            const tags = JSON.parse(JSON.stringify(req.body));
+            if(await dataServices.UpdateRealTime(tags) === true){
+                res.status(200).json('Update realtime success');
+            }
+            else{
+                res.status(200).json('Update failed')
+            }
+        }
+        else{
+            res.status(403);
         }
     }
 }

@@ -1,5 +1,5 @@
 {
-    "port" : 6669,
+    "port" : 6668,
     "DBUrl" : "mongodb://dbadmin:password@localhost:27017/",
     "DBPrefix" : "FV_",
     "DBUser" : "satadmin",

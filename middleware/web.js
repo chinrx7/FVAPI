@@ -97,11 +97,29 @@ module.exports.getDataLogger = async (Tags, STime, ETime) => {
 }
 
 tranfromHisData = (datas) => {
-    const trans = { Headers: [], Values: [] };
+    const trans = { Headers: [], Records: [] };
+
+    let Val;
 
     datas.forEach(d => {
+        if (!trans.Headers.includes(d.Name)) {
+            trans.Headers.push(d.Name);
+        }
 
+        d.records.forEach(r => {
+            if (!trans.Records.TimeStamp.includes(r.TimeStamp)) {
+                Val = { TimeStamp: r.TimeStamp, Values: [r.Value] };
+                trans.Records.push(Val);
+            }
+            else {
+                const eindex = trans.find(e => trans.Records.TimeStamp === r.TimeStamp);
+
+                trans.Records[eindex].Values.push(r.Value);
+            }
+        });
     });
+
+    return trans;
 }
 
 getHisData = async (Tag, STime, ETime) => {
@@ -218,7 +236,7 @@ getHisData = async (Tag, STime, ETime) => {
 
                 }
             }
-            else{
+            else {
                 for (let x = 0; x <= 11; x++) {
                     if (x !== 11) {
                         SYTime = new Date(i, x, 1);
