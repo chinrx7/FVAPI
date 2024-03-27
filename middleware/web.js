@@ -1,6 +1,7 @@
 const { connectCfgDB, getDBC } = require('../storages/dbC');
 const { connectHDB, getDBH } = require('../storages/dbH');
 const logger = require('../middleware/log');
+const { MongoGridFSChunkError } = require('mongodb');
 
 let dbC, dbH;
 
@@ -14,7 +15,30 @@ connectHDB((err) => {
     if (!err) {
         dbH = getDBH();
     }
-})
+});
+
+module.exports.getTagsConfig = async (VID) => {
+    try {
+        let res = [];
+        const cols = dbC.collection("TAGS");
+        //console.log(cols)
+        const options =  { projection:{ _id:0}};
+        let query;
+        if(VID !== 0){
+            query = { VesselID : VID}
+        }
+        let tags;
+        tags = await cols.find(query,options);
+        for await(t of tags){
+            //console.log(t)
+            res.push(t)
+        }
+        return res
+    }
+    catch (err) {
+        logger.loginfo("get tags config : " + err);
+    }
+}
 
 module.exports.getVesselInfo = async () => {
     const cols = dbC.collection("VESSEL_INFO");
@@ -88,52 +112,72 @@ module.exports.getcurrentvalues = async (req) => {
 
 module.exports.getDataLogger = async (Tags, STime, ETime) => {
 
-    let Datas = [];
+   // console.log(Tags.length)
 
     Tags.forEach(async T => {
         const rec = await getHisData(T, STime, ETime);
+        //console.log(rec)
         Datas.push(rec);
+        console.log(Tags.length, Datas.length)
+         if(Tags.length === Datas.length){
+            const res = tranfromHisData(Datas);
+            console.log(res)
+            return res
+         }
     });
 }
 
-tranfromHisData = (datas) => {
+module.exports.tranfromHisData =  (datas) => {
     const trans = { Headers: [], Records: [] };
 
     let Val;
 
+    let cnt = 0;
+
     datas.forEach(d => {
-        if (!trans.Headers.includes(d.Name)) {
+        if (!trans.Headers.toString().includes(d.Name)) {
             trans.Headers.push(d.Name);
         }
 
         d.records.forEach(r => {
-            if (!trans.Records.TimeStamp.includes(r.TimeStamp)) {
+            if(cnt === 0){
                 Val = { TimeStamp: r.TimeStamp, Values: [r.Value] };
                 trans.Records.push(Val);
             }
-            else {
-                const eindex = trans.find(e => trans.Records.TimeStamp === r.TimeStamp);
 
-                trans.Records[eindex].Values.push(r.Value);
+            if (!r.TimeStamp.toString().includes(r.TimeStamp)) {
+                console.log('x')
+                Val = { TimeStamp: r.TimeStamp, Values: [r.Value] };
+                trans.Records.push(Val);
             }
+            // else {
+            //     const eindex = trans.Records.findIndex(e => trans.Records.TimeStamp.toString() === r.TimeStamp.toString());
+            //     console.log(eindex)
+            //     trans.Records[eindex].Values.push(r.Value);
+            // }
         });
+
+        cnt = cnt + 1;
     });
 
     return trans;
 }
 
-getHisData = async (Tag, STime, ETime) => {
+module.exports.getHisData = async (Tag, STime, ETime) => {
+    STime = new Date(STime);
+    ETime = new Date(ETime);
+
     const MonDiff = ETime.getMonth() - STime.getMonth();
     const YrDiff = ETime.getFullYear() - STime.getFullYear();
 
-    let rec = { Name: Name, records: [] };
+    let rec = { Name: Tag, records: [] };
     const options = { sort: { TimeStamp: 1 }, projection: { _id: 0 } };
 
     const spt = Tag.split('-');
 
     if (YrDiff === 0) {
         if (MonDiff === 0) {
-            const colName = STime.getFullYear() + "-" + padMon(STime.getMonth() + 1);
+            let colName = STime.getFullYear() + "-" + padMon(STime.getMonth() + 1);
             colName = spt[0] + "_" + colName;
 
             const col = dbH.collection(colName);
@@ -143,7 +187,7 @@ getHisData = async (Tag, STime, ETime) => {
             const data = await col.find(query, options)
 
             for await (const d of data) {
-                rec.records.push({ Value: d.value, TimeStamp: d.TimeStamp });
+                rec.records.push({ Value: d.Value, TimeStamp: d.TimeStamp });
             }
         }
         else {
