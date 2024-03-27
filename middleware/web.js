@@ -122,7 +122,7 @@ module.exports.getDataLogger = async (Tags, STime, ETime) => {
          if(Tags.length === Datas.length){
             const res = tranfromHisData(Datas);
             console.log(res)
-            return res
+            return Datas
          }
     });
 }
@@ -145,22 +145,38 @@ module.exports.tranfromHisData =  (datas) => {
                 trans.Records.push(Val);
             }
 
-            if (!r.TimeStamp.toString().includes(r.TimeStamp)) {
-                console.log('x')
+            const chkexist = chekTimeExist(trans.Records,r.TimeStamp);
+            //console.log(chkexist)
+
+            if (!chkexist.exist) {
                 Val = { TimeStamp: r.TimeStamp, Values: [r.Value] };
                 trans.Records.push(Val);
             }
-            // else {
-            //     const eindex = trans.Records.findIndex(e => trans.Records.TimeStamp.toString() === r.TimeStamp.toString());
-            //     console.log(eindex)
-            //     trans.Records[eindex].Values.push(r.Value);
-            // }
+            else{
+                trans.Records[chkexist.eindex].Values.push(r.Value);
+            }
         });
 
         cnt = cnt + 1;
     });
 
     return trans;
+}
+
+chekTimeExist = (JArr,STime) => {
+    let jres = { exist: false, eindex:0 };
+    for(let index =0; index < JArr.length; index++){
+        //console.log(JArr[index])
+        const etime = JArr[index].TimeStamp;
+        //console.log(STime, etime)
+        if(etime === STime){
+            jres.exist = true;
+            jres.eindex = index;
+            //console.log('exist')
+            break;
+        }
+    }
+    return jres;
 }
 
 module.exports.getHisData = async (Tag, STime, ETime) => {
