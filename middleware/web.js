@@ -111,7 +111,6 @@ module.exports.getcurrentvalues = async (req) => {
 }
 
 module.exports.getDataLogger = async (Tags, STime, ETime) => {
-
    // console.log(Tags.length)
 
     Tags.forEach(async T => {
@@ -121,16 +120,13 @@ module.exports.getDataLogger = async (Tags, STime, ETime) => {
         console.log(Tags.length, Datas.length)
          if(Tags.length === Datas.length){
             const res = tranfromHisData(Datas);
-            console.log(res)
-            return Datas
+            return res
          }
     });
 }
 
 module.exports.tranfromHisData =  (datas) => {
     const trans = { Headers: [], Records: [] };
-
-    let Val;
 
     let cnt = 0;
 
@@ -141,23 +137,17 @@ module.exports.tranfromHisData =  (datas) => {
 
         d.records.forEach(r => {
             if(cnt === 0){
-                Val = { TimeStamp: r.TimeStamp, Values: [r.Value] };
-                trans.Records.push(Val);
-            }
-
-            const chkexist = chekTimeExist(trans.Records,r.TimeStamp);
-            //console.log(chkexist)
-
-            if (!chkexist.exist) {
-                Val = { TimeStamp: r.TimeStamp, Values: [r.Value] };
-                trans.Records.push(Val);
+                const Val = { TimeStamp: r.TimeStamp, Values:[r.Value] }
+                trans.Records.push(Val)
             }
             else{
-                trans.Records[chkexist.eindex].Values.push(r.Value);
+                const chk = chekTimeExist(trans.Records, r.TimeStamp);
+                if(chk.exist){
+                    trans.Records[chk.eindex].Values.push(r.Value);
+                }
             }
         });
-
-        cnt = cnt + 1;
+        cnt++;
     });
 
     return trans;
@@ -168,11 +158,9 @@ chekTimeExist = (JArr,STime) => {
     for(let index =0; index < JArr.length; index++){
         //console.log(JArr[index])
         const etime = JArr[index].TimeStamp;
-        //console.log(STime, etime)
-        if(etime === STime){
+        if(etime.toString() === STime.toString()){
             jres.exist = true;
             jres.eindex = index;
-            //console.log('exist')
             break;
         }
     }
