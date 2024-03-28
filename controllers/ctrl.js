@@ -135,6 +135,37 @@ module.exports.getcurrentvalues = async (req, res) => {
     }
 }
 
+module.exports.getChartValues = async (req, res) => {
+    if(config.Debug === 'true'){
+        logger.loginfo('get chart value');
+    }
+    const token = req.headers["authorization"];
+    if(token){
+        if(auth.ValidateToken(token)){
+            if(req.body){
+                const { StartTime, EndTime, Tags } = req.body;
+                let Datas = [];
+                Tags.forEach(async t => {
+                    const rec = await ws.getChartData(t, StartTime, EndTime);
+                    if(rec){ Datas.push(rec); }
+                    if(Tags.length === Datas.length){
+                        res.status(200).json(Datas);
+                    }
+                });
+            }
+            else{
+                res.status(400).json('Invalid request!!!');
+            }
+        }
+        else{
+            res.status(401).json('not authorized');
+        }
+    }
+    else{
+        res.status(400).json('bad request');
+    }
+}
+
 module.exports.getHisvalues = async (req, res) => {
     if(config.Debug === 'true'){
         logger.loginfo("get Historian value")

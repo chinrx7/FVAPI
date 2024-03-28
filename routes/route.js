@@ -10,6 +10,7 @@ router.post('/updaterealtime', ctrl.updateRealtime);
 router.post('/getcurrentvalues', ctrl.getcurrentvalues);
 router.post('/gettagconfig',ctrl.getTagConfigure);
 router.post('/loggergethistorianvalues', ctrl.getHisvalues);
+router.post('/ChartGetHistorianValues', ctrl.getChartValues);
 
 router.get('/getvesselcurrentInfo', ctrl.getvesselcurrentInfo);
 
