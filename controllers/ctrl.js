@@ -4,9 +4,25 @@ const auth = require('../middleware/auth');
 const dataServices = require('../middleware/data');
 const ws = require('../middleware/web');
 const logger = require('../middleware/log');
+const cals = require('../middleware/datacal');
 
 module.exports.test = async (req, res) => {
     tag.getTagConfigs();
+}
+
+module.exports.getDataCal = async (req, res) => {
+    const { Tags } = req.body;
+
+    let datas = []
+
+    Tags.forEach(async t =>{
+        const data = await cals.getDataCal(t,new Date);
+        datas.push(data)
+        if(Tags.length === datas.length){
+            res.status(200).json(datas);
+        }
+    })
+
 }
 
 module.exports.getTagConfigure = async (req,res) => {

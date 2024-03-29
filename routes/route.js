@@ -11,6 +11,7 @@ router.post('/getcurrentvalues', ctrl.getcurrentvalues);
 router.post('/gettagconfig',ctrl.getTagConfigure);
 router.post('/loggergethistorianvalues', ctrl.getHisvalues);
 router.post('/ChartGetHistorianValues', ctrl.getChartValues);
+router.post('/getdatacal', ctrl.getDataCal);
 
 router.get('/getvesselcurrentInfo', ctrl.getvesselcurrentInfo);
 
