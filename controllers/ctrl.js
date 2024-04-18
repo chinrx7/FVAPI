@@ -25,6 +25,44 @@ module.exports.getDataCal = async (req, res) => {
 
 }
 
+module.exports.getDataCalHour = async(req, res) => {
+    const { Tags } = req.body;
+    let datas = [];
+
+    Tags.forEach(async t =>{
+        const data = await cals.getDataCalHour(t);
+        datas.push(data)
+        if(Tags.length === datas.length){
+            res.status(200).json(datas);
+        }
+    })
+}
+
+module.exports.getDataCalDay = async(req, res) => {
+    const { Tags } = req.body;
+    let datas = [];
+
+    //console.log(Tags)
+
+    Tags.forEach(async t =>{
+        //console.log(t)
+        const data = await cals.getDataCalDay(t);
+        datas.push(data)
+        if(Tags.length === datas.length){
+            res.status(200).json(datas);
+        }
+    })
+}
+
+
+
+module.exports.getFlowData = async (req,res) => {
+    const { Vessel, Engines } = req.body;
+    const data = await cals.getFlowData(Vessel, Engines);
+    //console.log(data)
+    res.status(200).json(data);
+}
+
 module.exports.getTagConfigure = async (req,res) => {
     if(config.Debug === 'true'){
         logger.loginfo("get tag configs");

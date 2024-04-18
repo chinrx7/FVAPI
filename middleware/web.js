@@ -47,7 +47,7 @@ module.exports.getVesselInfo = async () => {
     const query = {};
     const options = { projection: { _id: 0 } };
 
-    const Tzone = "UTC+7";
+    const Tzone = new Date;
 
     const vs = await cols.find(query, options);
     for await (const data of vs) {
