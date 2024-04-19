@@ -15,6 +15,9 @@ router.post('/getdatacal', ctrl.getDataCal);
 router.post('/getdatahour', ctrl.getDataCalHour);
 router.post('/getflowdata', ctrl.getFlowData);
 router.post('/getdataday', ctrl.getDataCalDay);
+router.post('/getdistance', ctrl.getDistance);
+router.post('/getmaxspeed', ctrl.getMaxSpeed);
+router.post('/getavgspeed', ctrl.getAVGSpeed);
 
 router.get('/getvesselcurrentInfo', ctrl.getvesselcurrentInfo);
 

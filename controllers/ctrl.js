@@ -54,7 +54,44 @@ module.exports.getDataCalDay = async(req, res) => {
     })
 }
 
+module.exports.getDistance = async (req,res) => {
+    const { Tags } = req.body;
+    let datas = [];
 
+    Tags.forEach(async t => {
+       const sums = await cals.getDistance(t);
+       datas.push(sums);
+       if(Tags.length === datas.length){
+        res.status(200).json(datas);
+       }
+    })
+}
+
+module.exports.getMaxSpeed = async (req,res) => {
+    const { Tags } = req.body;
+    let datas = [];
+
+    Tags.forEach(async t => {
+       const sums = await cals.getMaxSpeed(t);
+       datas.push(sums);
+       if(Tags.length === datas.length){
+        res.status(200).json(datas);
+       }
+    })
+}
+
+module.exports.getAVGSpeed = async (req,res) => {
+    const { Tags } = req.body;
+    let datas = [];
+
+    Tags.forEach(async t => {
+       const sums = await cals.getAVGSpeed(t);
+       datas.push(sums);
+       if(Tags.length === datas.length){
+        res.status(200).json(datas);
+       }
+    })
+}
 
 module.exports.getFlowData = async (req,res) => {
     const { Vessel, Engines } = req.body;

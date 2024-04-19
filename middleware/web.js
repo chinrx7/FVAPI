@@ -47,13 +47,11 @@ module.exports.getVesselInfo = async () => {
     const query = {};
     const options = { projection: { _id: 0 } };
 
-    const Tzone = new Date;
-
     const vs = await cols.find(query, options);
     for await (const data of vs) {
         //console.log(data)
         const position = await getVesselPosition(data.Prefix);
-        const v = { id: data.SourceID, name: data.Name, prefix: data.Prefix, image: data.Images, timestamp: Tzone, lattitude: position.lattitude, longtitude: position.longtitude, description: data.Description };
+        const v = { id: data.SourceID, name: data.Name, prefix: data.Prefix, image: data.Images, timestamp: position.TimeStamp, lattitude: position.lattitude, longtitude: position.longtitude, description: data.Description };
         vessel.push(v)
     }
 
@@ -61,7 +59,7 @@ module.exports.getVesselInfo = async () => {
 }
 
 getVesselPosition = async (VesselName) => {
-    const postion = { lattitude: 0, longtitude: 0 };
+    const postion = { lattitude: 0, longtitude: 0, TimeStamp: ""};
 
     const NameLAT = VesselName + "-VES-GPS-LAT";
     const NameLONG = VesselName + "-VES-GPS-LONG";
@@ -78,14 +76,21 @@ getVesselPosition = async (VesselName) => {
     const data = await realtime.find(query, options);
 
     for await (const d of data) {
+        console.log(d);
         if (d.Name === NameLAT) {
             postion.lattitude = d.Value;
         }
         else {
             postion.longtitude = d.Value;
         }
+        postion.TimeStamp = d.TimeStamp;
     }
 
+    let cDate = new Date(postion.TimeStamp);
+
+    cDate = cDate.setHours(cDate.getHours()+7);
+
+    postion.TimeStamp = new Date(cDate);
 
     return postion;
 }

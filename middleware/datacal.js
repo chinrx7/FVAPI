@@ -9,6 +9,135 @@ connectHDB((err) => {
     }
 });
 
+module.exports.getDistance = async (Tag) => {
+
+    let STime = new Date;
+    STime = new Date(STime.setHours(0,0,0,0));
+    
+    let ETime = new Date;
+
+    //console.log(STime, ETime)
+
+    const pipeline = [
+        {
+            $match: {
+                Name: Tag,
+                TimeStamp: {
+                    $gte: STime,
+                    $lte: ETime
+                }
+            }
+        },
+        {
+            $group: {
+                _id:{
+                    Name: "$Name"
+                },
+                Value:{
+                    $sum: "$Value"
+                }
+            }
+        }
+    ];
+
+
+    const STag = Tag.split('-');
+    const colName = `${STag[0]}_${STime.getFullYear()}-${padMon(STime.getMonth()+1)}`;
+    const cols = dbH.collection(colName);
+
+    const aggs = await cols.aggregate(pipeline);
+    //console.log(aggs)
+    for await(const doc of aggs){
+        return doc;
+    }
+}
+
+module.exports.getMaxSpeed = async (Tag) => {
+
+    let STime = new Date;
+    STime = new Date(STime.setHours(0,0,0,0));
+    
+    let ETime = new Date;
+
+    //console.log(STime, ETime)
+
+    const pipeline = [
+        {
+            $match: {
+                Name: Tag,
+                TimeStamp: {
+                    $gte: STime,
+                    $lte: ETime
+                }
+            }
+        },
+        {
+            $group: {
+                _id:{
+                    Name: "$Name"
+                },
+                Value:{
+                    $max: "$Value"
+                }
+            }
+        }
+    ];
+
+
+    const STag = Tag.split('-');
+    const colName = `${STag[0]}_${STime.getFullYear()}-${padMon(STime.getMonth()+1)}`;
+    const cols = dbH.collection(colName);
+
+    const aggs = await cols.aggregate(pipeline);
+    //console.log(aggs)
+    for await(const doc of aggs){
+        return doc;
+    }
+}
+
+module.exports.getAVGSpeed = async (Tag) => {
+
+    let STime = new Date;
+    STime = new Date(STime.setHours(0,0,0,0));
+    
+    let ETime = new Date;
+
+    //console.log(STime, ETime)
+
+    const pipeline = [
+        {
+            $match: {
+                Name: Tag,
+                TimeStamp: {
+                    $gte: STime,
+                    $lte: ETime
+                }
+            }
+        },
+        {
+            $group: {
+                _id:{
+                    Name: "$Name"
+                },
+                Value:{
+                    $avg: "$Value"
+                }
+            }
+        }
+    ];
+
+
+    const STag = Tag.split('-');
+    const colName = `${STag[0]}_${STime.getFullYear()}-${padMon(STime.getMonth()+1)}`;
+    const cols = dbH.collection(colName);
+
+    const aggs = await cols.aggregate(pipeline);
+    //console.log(aggs)
+    for await(const doc of aggs){
+        return doc;
+    }
+}
+
 module.exports.getDataCal = async (Tag, SPTime) => {
     SPTime.setSeconds(0, 0);
     SPTime = new Date(SPTime);
@@ -28,6 +157,9 @@ module.exports.getDataCal = async (Tag, SPTime) => {
         MaxTime = new Date(d.TimeStamp)
     }
     //console.log(colTime,MaxTime,Tag)
+    if(!MaxTime){
+        MaxTime = new Date;
+    }
     STime = MaxTime;
     ETime = MaxTime;
     STime = new Date(STime.setMinutes(STime.getMinutes() - 2));
@@ -81,6 +213,12 @@ module.exports.getDataCalHour = async (Tag) => {
 
 }
 
+conDateLocal = (date) => {
+    let d = new Date(date);
+    d = d.setHours(d.getHours()+7);
+    return new Date(d);
+}
+
 module.exports.getDataCalDay = async (Tag) => {
     const CTime = new Date;
     const spt = Tag.split('-');
@@ -92,12 +230,13 @@ module.exports.getDataCalDay = async (Tag) => {
     const MaxE = await colS.find({Name: Tag}).sort({ TimeStamp: -1 }).limit(1);
     let ETime;
     for await (const d of MaxE) {
-        ETime = new Date(d.TimeStamp)
+        ETime = new Date(d.TimeStamp);
     }
 
     let STime =new Date(ETime);
     STime = new Date;
     STime = STime.setHours(0,0,0,0);
+    //STime = STime.setHours(STime.getHours()+7);
     STime = new Date(STime);
 
     //console.log(STime, ETime);
@@ -105,8 +244,18 @@ module.exports.getDataCalDay = async (Tag) => {
     const options = { projection: { _id: 0 } };
 
     let res = { Name: Tag, Records: [] };
-    const dataS = await colS.findOne({ Name: Tag, TimeStamp: STime }, options);
+    let dataS = await colS.findOne({ Name: Tag, TimeStamp: STime }, options);
     const dataE = await colS.findOne({ Name: Tag, TimeStamp: ETime }, options);
+    //console.log({ Name: Tag, TimeStamp: STime } ,dataS)
+
+    if(!dataS){
+        const midMax =  await colS.find({Name: Tag, TimeStamp:{$lte:STime}}).sort({ TimeStamp: -1}).limit(1);
+        let midTime;
+        for await (const d of midMax){
+            midTime = new Date(d.TimeStamp);
+        }
+        dataS = await colS.findOne({ Name: Tag, TimeStamp: midTime }, options);
+    }
 
     if (dataS) {
         res.Records.push({ TimeStamp: dataS.TimeStamp, Value: dataS.Value });
