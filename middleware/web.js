@@ -58,6 +58,21 @@ module.exports.getVesselInfo = async () => {
     return vessel;
 }
 
+module.exports.getpoints = async (prefix) => {
+    const cols = dbC.collection("TAGS");
+    let tags = [];
+
+    const query = { TagName: new RegExp('^'+prefix) };
+    //console.log(query)
+    const options = { projection: { _id: 0 } };
+    const tag = await cols.find(query, options);
+    for await (const t of tag){
+        tags.push(t);
+    }
+
+    return tags;
+}
+
 getVesselPosition = async (VesselName) => {
     const postion = { lattitude: 0, longtitude: 0, TimeStamp: ""};
 

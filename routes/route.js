@@ -18,6 +18,7 @@ router.post('/getdataday', ctrl.getDataCalDay);
 router.post('/getdistance', ctrl.getDistance);
 router.post('/getmaxspeed', ctrl.getMaxSpeed);
 router.post('/getavgspeed', ctrl.getAVGSpeed);
+router.post('/getpoints', ctrl.getpoints);
 
 router.get('/getvesselcurrentInfo', ctrl.getvesselcurrentInfo);
 

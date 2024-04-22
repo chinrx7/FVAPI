@@ -10,6 +10,8 @@ module.exports.test = async (req, res) => {
     tag.getTagConfigs();
 }
 
+
+
 module.exports.getDataCal = async (req, res) => {
     const { Tags } = req.body;
 
@@ -125,16 +127,43 @@ module.exports.getTagConfigure = async (req,res) => {
     }
 }
 
+module.exports.getpoints = async (req,res) => {
+    if(config.Debug === "true"){
+        logger.loginfo("getpoints");
+    }
+    const token = req.headers["authorization"];
+    if (token) {
+        if (auth.ValidateToken(token)) {
+            const { prefix } = req.body;
+            if(prefix){
+                const tags = await ws.getpoints(prefix);
+                res.status(200).json(tags);
+            }
+        }
+        else{
+            res.status(403).json('not authorized');
+        }
+    }
+    else{
+        res.status(403).json('authen require');
+    }
+}
+
 module.exports.insertData = async (req, res) => {
     if(config.Debug === "true"){
-        logger.loginfo("insert historian data");
+        logger.loginfo("begin insert historian data");
     }
     const token = req.headers["authorization"];
     if (token) {
         if (auth.ValidateToken(token)) {
             const data = req.body;
-            if (data) {
+            // console.log(data)
+            if (data.length>0) {
                 if (await dataServices.saveHisData(data) === true) {
+                    const SName = data[0].Name.split('-');
+                    if(config.Debug === "true"){
+                        logger.loginfo(`${SName[0]} insert historian success`)
+                    }
                     res.status(200).json('Insert operation success!!!');
                 }
             }
@@ -150,17 +179,27 @@ module.exports.insertData = async (req, res) => {
 
 module.exports.updateRealtime = async (req,res) => {
     if(config.Debug === "true"){
-        logger.loginfo("update Realtime");
+        logger.loginfo("begin update Realtime");
     }
     const token = req.headers["authorization"];
     if(token){
         if(auth.ValidateToken(token)){
             const tags = JSON.parse(JSON.stringify(req.body));
-            if(await dataServices.UpdateRealTime(tags) === true){
-                res.status(200).json('Update realtime success');
+            if (tags.length > 0) {
+                //console.log(tags)
+                const SName = tags[0].Name.split('-');
+                if (await dataServices.UpdateRealTime(tags) === true) {
+                    if (config.Debug === "true") {
+                        logger.loginfo(`${SName[0]} update realtime success`)
+                    }
+                    res.status(200).json('Update realtime success');
+                }
+                else {
+                    res.status(200).json('Update failed')
+                }
             }
             else{
-                res.status(200).json('Update failed')
+                res.status(200).json('No tags update')
             }
         }
         else{

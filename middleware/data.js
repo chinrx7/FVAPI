@@ -15,6 +15,8 @@ module.exports.UpdateRealTime = async (realtime) => {
 
     let res = false;
 
+    const SName = realtime[0].Name.split('-');
+
     try {
         realtime.forEach(async r => {
             const exist = await CheckRealtimeExist(r.Name);
@@ -32,7 +34,7 @@ module.exports.UpdateRealTime = async (realtime) => {
         res = true;
     }
     catch (err) {
-        logger.loginfo("Update realtime : " + err);
+        logger.loginfo(SName[0] + "Update realtime : " + err);
     }
 
     return res;
@@ -61,12 +63,14 @@ CheckRealtimeExist = async (Name) => {
 
 UpdateRealtimeData = async (insertdata, updatedata) => {
     let res = false;
+    const SName = updatedata[0].Name.split('-');
     try {
         const cols = dbH.collection("Realtime");
 
         if (insertdata.length > 0) {
             cols.insertMany(insertdata);
         }
+
 
         if (updatedata.length > 0) {
             updatedata.forEach(u => {
@@ -87,7 +91,7 @@ UpdateRealtimeData = async (insertdata, updatedata) => {
         return res;
     }
     catch (err) {
-        logger.loginfo("Update realtime data : " + err);
+        logger.loginfo(SName[0] + "Update realtime data : " + err);
     }
 }
 
