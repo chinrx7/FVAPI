@@ -63,7 +63,14 @@ CheckRealtimeExist = async (Name) => {
 
 UpdateRealtimeData = async (insertdata, updatedata) => {
     let res = false;
-    const SName = updatedata[0].Name.split('-');
+    let SName
+    if (updatedata.length>0) {
+        SName = updatedata[0].Name.split('-');
+    }
+    else {
+        SName = insertdata[0].Name.split('-');
+    }
+
     try {
         const cols = dbH.collection("Realtime");
 

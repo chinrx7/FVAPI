@@ -296,6 +296,40 @@ module.exports.getChartValues = async (req, res) => {
     }
 }
 
+module.exports.getReportData = async (req,res) => {
+    if(config.Debug === 'true'){
+        logger.loginfo('get report data');
+    }
+    console.log(req.body)
+    const token = req.headers["authorization"];
+    if(token){
+        if(auth.ValidateToken(token)){
+            if(req.body){
+                const { StartTime, EndTime, Tags } = req.body;
+                let Datas = [];
+                Tags.forEach(async t => {
+                    const rec = await ws.getHisData(t,StartTime,EndTime);
+                    if(rec){
+                        Datas.push(rec);
+                    }
+                    if(Tags.length === Datas.length){
+                        res.status(200).json(Datas);
+                    }
+                })
+            }
+            else{
+                res.status(200).json('Invalid request body!!!');
+            }
+        }
+        else{
+            res.status(403).json('Access denied!!!');
+        }
+    }
+    else{
+        res.status(403).json('Authentication require!!!');
+    }
+}
+
 module.exports.getHisvalues = async (req, res) => {
     if(config.Debug === 'true'){
         logger.loginfo("get Historian value")

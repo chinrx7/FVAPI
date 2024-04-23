@@ -72,13 +72,6 @@ module.exports.getMaxSpeed = async (Tag) => {
             }
         },
         {
-            $match:{
-                Value:{
-                    $gt: 0.1
-                }
-            }
-        },
-        {
             $group: {
                 _id:{
                     Name: "$Name"
@@ -118,13 +111,6 @@ module.exports.getAVGSpeed = async (Tag) => {
                 TimeStamp: {
                     $gte: STime,
                     $lte: ETime
-                }
-            }
-        },
-        {
-            $match:{
-                Value:{
-                    $gt: 0.1
                 }
             }
         },
