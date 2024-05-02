@@ -150,18 +150,25 @@ module.exports.getpoints = async (req,res) => {
 }
 
 module.exports.insertData = async (req, res) => {
+    // req.body.forEach(r=>{
+    //     console.log(r.Name);
+    //     r.Records.forEach(d => {
+    //         console.log(d)
+    //     })
+    // })
     if(config.Debug === "true"){
         logger.loginfo("begin insert historian data");
     }
     const token = req.headers["authorization"];
+
     if (token) {
         if (auth.ValidateToken(token)) {
             const data = req.body;
             // console.log(data)
-            if (data.length>0) {
+            if (data.length > 0) {
                 if (await dataServices.saveHisData(data) === true) {
                     const SName = data[0].Name.split('-');
-                    if(config.Debug === "true"){
+                    if (config.Debug === "true") {
                         logger.loginfo(`${SName[0]} insert historian success`)
                     }
                     res.status(200).json('Insert operation success!!!');
@@ -171,10 +178,11 @@ module.exports.insertData = async (req, res) => {
                 res.status(400).json('Bad request!!!');
             }
         }
-        else{
+        else {
             res.status(403).json('not authorized');
         }
     }
+
 }
 
 module.exports.updateRealtime = async (req,res) => {
@@ -300,7 +308,6 @@ module.exports.getReportData = async (req,res) => {
     if(config.Debug === 'true'){
         logger.loginfo('get report data');
     }
-    console.log(req.body)
     const token = req.headers["authorization"];
     if(token){
         if(auth.ValidateToken(token)){

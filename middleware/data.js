@@ -112,26 +112,29 @@ module.exports.saveHisData = async (datas) => {
         const docs = [];
         const cols = [];
 
-        jData.forEach(j => {
-            j.Records.forEach(r => {
-                const docDate = new Date(r.TimeStamp);
 
-                let spt = j.Name.split('-');
-                const colname = spt[0] + "_" + docDate.getFullYear() + '-' + padMon((docDate.getMonth() + 1));
+        if (jData.length > 0) {
+            jData.forEach(j => {
+                j.Records.forEach(r => {
+                    const docDate = new Date(r.TimeStamp);
 
-                //console.log(colname)
+                    let spt = j.Name.split('-');
+                    const colname = spt[0] + "_" + docDate.getFullYear() + '-' + padMon((docDate.getMonth() + 1));
 
-                if (!cols.includes(colname)) {
-                    cols.push(colname);
-                }
+                    //console.log(colname)
 
-                const rec = { Name: j.Name, Value: r.Value, TimeStamp: r.TimeStamp, Colname: colname };
+                    if (!cols.includes(colname)) {
+                        cols.push(colname);
+                    }
 
-                //console.log(rec)
+                    const rec = { Name: j.Name, Value: r.Value, TimeStamp: r.TimeStamp, Colname: colname };
 
-                docs.push(rec);
-            })
-        });
+                    //console.log(rec)
+
+                    docs.push(rec);
+                })
+            });
+        }
 
         //console.log(cols)
         // console.log(docs)
@@ -149,7 +152,7 @@ module.exports.saveHisData = async (datas) => {
 
         //console.log(insertDocs)
 
-        if (insertDocs) {
+        if (insertDocs.length>0) {
             saveHisToDB(insertDocs);
         }
 
